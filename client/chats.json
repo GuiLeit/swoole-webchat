@@ -1,0 +1,300 @@
+{
+  "chats": [
+    {
+      "id": 1,
+      "name": "Bella ❤️",
+      "avatar": "https://i.pravatar.cc/150?img=5",
+      "lastMessage": "Pq não faz academia também gatinho? Pode intercalar...",
+      "timestamp": "22:33",
+      "unreadCount": 3,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Oi! Tudo bem?",
+          "timestamp": "22:15",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "sent",
+          "text": "Oi! Tudo sim, e você?",
+          "timestamp": "22:18",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "received",
+          "text": "Tudo ótimo! Pensei em ir pra academia hoje",
+          "timestamp": "22:25",
+          "status": "read"
+        },
+        {
+          "id": 4,
+          "sender": "received",
+          "text": "Pq não faz academia também gatinho? Pode intercalar...",
+          "timestamp": "22:33",
+          "status": "delivered"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Guilherme (você)",
+      "avatar": "https://i.pravatar.cc/150?img=12",
+      "lastMessage": "✓✓ Graduação Branca R$ 120,00 1. Ana Lucia Souza Filipe...",
+      "timestamp": "07/10/2025",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "sent",
+          "text": "https://github.com/GuiLeit/he_project",
+          "timestamp": "18:38",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "sent",
+          "text": "40 reais rebeca",
+          "timestamp": "19:46",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "sent",
+          "text": "Graduação Branca R$ 120,00\n1. Ana Lucia Souza Filipe\n2. Camila Aparecida Gomes\n3. Charllhe Barbosa da Silva\n4. Davi Luiz Costa Gama\n5. Diego Marques dos Santos\n6. Fabrício Juliano Pinto Guedes\n7. Gustavo Andrade de Oliveira\n8. Gustavo Tuccuri Gonçalves\n9. Kauã de Brito Dias\n10. Lucas Gonçalves Tuccuri\n11. Maria Eduarda de Arruda Pereira",
+          "timestamp": "20:15",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Upside Financeiro 💰",
+      "avatar": "https://i.pravatar.cc/150?img=33",
+      "lastMessage": "~ Arthur Condé: Opiniões sobre?",
+      "timestamp": "22:05",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Pessoal, o que acharam da última análise?",
+          "timestamp": "21:45",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "received",
+          "text": "~ Arthur Condé: Opiniões sobre?",
+          "timestamp": "22:05",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "GRAKAR 18/10 KGV",
+      "avatar": "https://i.pravatar.cc/150?img=8",
+      "lastMessage": "~ G. Forlani: Normal, invertido, seco, molhado, kart bom, k...",
+      "timestamp": "21:48",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "~ G. Forlani: Normal, invertido, seco, molhado, kart bom, kart ruim",
+          "timestamp": "21:48",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "sent",
+          "text": "Confirmado para sábado?",
+          "timestamp": "21:50",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Raul",
+      "avatar": "https://i.pravatar.cc/150?img=13",
+      "lastMessage": "✓✓ Ou a gente usa o carro dela na pista mesmo kkkk",
+      "timestamp": "20:52",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "E aí, vai dar pra ir no fim de semana?",
+          "timestamp": "20:30",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "sent",
+          "text": "Vou sim! Vamos de qual carro?",
+          "timestamp": "20:45",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "sent",
+          "text": "Ou a gente usa o carro dela na pista mesmo kkkk",
+          "timestamp": "20:52",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Atibia 2.0 ga dawn😍💔",
+      "avatar": "https://i.pravatar.cc/150?img=16",
+      "lastMessage": "Iago: Tenho q ver o preço no mercado atualizado das nova ver...",
+      "timestamp": "20:16",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Iago: Tenho q ver o preço no mercado atualizado das nova versão",
+          "timestamp": "20:16",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "sent",
+          "text": "Beleza, me avisa quando souber!",
+          "timestamp": "20:20",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Rick Fight - Muay Thai 🇹🇭",
+      "avatar": "https://i.pravatar.cc/150?img=11",
+      "lastMessage": "~ Larissa Camillo 📸: Foto",
+      "timestamp": "19:57",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Treino hoje às 19h, pessoal!",
+          "timestamp": "18:30",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "received",
+          "text": "~ Larissa Camillo 📸: Foto",
+          "timestamp": "19:57",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "sent",
+          "text": "Estarei lá!",
+          "timestamp": "19:58",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Pai",
+      "avatar": "https://i.pravatar.cc/150?img=15",
+      "lastMessage": "✓✓ https://www.youtube.com/live/XN020yKJZYU?si=XWoKo0J...",
+      "timestamp": "18:44",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Oi filho, tudo bem?",
+          "timestamp": "17:30",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "sent",
+          "text": "Oi pai! Tudo ótimo e você?",
+          "timestamp": "18:15",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "sent",
+          "text": "https://www.youtube.com/live/XN020yKJZYU?si=XWoKo0J",
+          "timestamp": "18:44",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "amistoso internacional",
+      "avatar": "https://i.pravatar.cc/150?img=22",
+      "lastMessage": "~ Vini: Espera eu voltar irmão",
+      "timestamp": "18:37",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Bora marcar o jogo pra quando?",
+          "timestamp": "18:20",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "received",
+          "text": "~ Vini: Espera eu voltar irmão",
+          "timestamp": "18:37",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "sent",
+          "text": "Tranquilo, me avisem!",
+          "timestamp": "18:40",
+          "status": "read"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Marketsys Sistemas",
+      "avatar": "https://i.pravatar.cc/150?img=31",
+      "lastMessage": "Sua licença foi renovada com sucesso",
+      "timestamp": "17:54",
+      "unreadCount": 0,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "received",
+          "text": "Olá! Este é um lembrete sobre a renovação da sua licença.",
+          "timestamp": "17:45",
+          "status": "read"
+        },
+        {
+          "id": 2,
+          "sender": "received",
+          "text": "Sua licença foi renovada com sucesso",
+          "timestamp": "17:54",
+          "status": "read"
+        },
+        {
+          "id": 3,
+          "sender": "sent",
+          "text": "Obrigado!",
+          "timestamp": "17:55",
+          "status": "read"
+        }
+      ]
+    }
+  ]
+}
