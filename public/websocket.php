@@ -6,10 +6,10 @@
  * - Provides HTTP API endpoints
  */
 
+use App\Controllers\WebsocketController;
 use OpenSwoole\WebSocket\Server;
 use OpenSwoole\WebSocket\Frame;
 use OpenSwoole\Http\Request;
-use OpenSwoole\Http\Response;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -23,20 +23,21 @@ $server->set([
     'heartbeat_idle_time' => 600,
 ]);
 
+$WebsocketController = new WebsocketController($server);
 
 // ========================================
 //               SERVER EVENTS
 // ========================================
 $server->on('open', function (Server $server, Request $request) use ($WebsocketController) {
-    echo "New connection established: {$request->fd}\n";
+    $WebsocketController->handleOpen($request);
 });
 
-$server->on('message', function (Server $server, Frame $frame) {
-    echo "Received message from {$frame->fd}: {$frame->data}\n";
+$server->on('message', function (Server $server, Frame $frame) use ($WebsocketController) {
+    $WebsocketController->handleMessage($frame);
 });
 
 $server->on('close', function (int $fd) use ($WebsocketController) {
-    echo "Connection closed: {$fd}\n";
+    $WebsocketController->handleClose($fd);
 });
 
 $server->on('start', function (Server $server) {
