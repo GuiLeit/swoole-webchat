@@ -1,7 +1,8 @@
-FROM php:8.2-cli-alpine
+FROM php:8.4-cli-alpine
 
 # Install necessary dependencies for Swoole and Composer (Alpine commands)
 RUN apk add --no-cache \
+    bash \
     autoconf \
     gcc \
     g++ \
@@ -22,6 +23,11 @@ RUN pecl channel-update pecl.php.net \
     && pecl install openswoole redis \
     && docker-php-ext-install pdo pdo_mysql mysqli \
     && docker-php-ext-enable openswoole redis
+
+# Install Xdebug for code coverage
+RUN apk add --no-cache $PHPIZE_DEPS \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 # Generate self-signed certificate
 RUN mkdir -p /etc/ssl/certs /etc/ssl/private && \

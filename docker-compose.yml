@@ -25,6 +25,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - XDEBUG_MODE=coverage,debug
 
   redis:
     image: redis:7-alpine
