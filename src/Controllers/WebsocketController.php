@@ -6,30 +6,45 @@ use OpenSwoole\WebSocket\Server;
 use OpenSwoole\Http\Request;
 use OpenSwoole\WebSocket\Frame;
 use App\Services\RedisManager;
+use App\Services\AuthService;
+use App\Services\MessageService;
+use App\Services\BroadcastService;
+use App\Services\ConnectionService;
 
 class WebsocketController
 {
     private Server $server;
     private array $connections = []; // fd => user_id mapping
+    
+    private AuthService $authService;
+    private MessageService $messageService;
+    private BroadcastService $broadcastService;
+    private ConnectionService $connectionService;
 
     public function __construct(Server $server)
     {
         $this->server = $server;
+        
+        // Initialize services
+        $this->authService = new AuthService();
+        $this->messageService = new MessageService();
+        $this->broadcastService = new BroadcastService($server, $this->connections);
+        $this->connectionService = new ConnectionService($server, $this->connections);
     }
 
-    // ========================================
-    //               EVENT HANDLERS
-    // ========================================
+    // ====
+    //    SWOOLE EVENT HANDLERS
+    // ====
     public function handleOpen(Request $request): void
     {
         $fd = $request->fd;
         echo "Connection opened: fd={$fd}\n";
         
         // Send welcome message
-        $this->server->push($fd, json_encode([
+        $this->connectionService->sendResponse($fd, [
             'type' => 'welcome',
             'message' => 'Connected to WebSocket server'
-        ]));
+        ]);
     }
 
     public function handleMessage(Frame $frame): void
@@ -42,7 +57,7 @@ class WebsocketController
             $message = json_decode($data, true);
             
             if (!$message || !isset($message['action'])) {
-                $this->sendError($fd, 'Invalid message format');
+                $this->connectionService->sendError($fd, 'Invalid message format');
                 return;
             }
             
@@ -50,18 +65,18 @@ class WebsocketController
                 case 'auth':
                     $this->handleAuth($fd, $message['data'] ?? []);
                     break;
-                    
+                
                 case 'send_message':
                     $this->handleSendMessage($fd, $message['data'] ?? []);
                     break;
-                    
+                
                 default:
-                    $this->sendError($fd, 'Unknown action: ' . $message['action']);
+                    $this->connectionService->sendError($fd, 'Unknown action: ' . $message['action']);
             }
             
         } catch (\Exception $e) {
             echo "Error handling message: " . $e->getMessage() . "\n";
-            $this->sendError($fd, 'Server error');
+            $this->connectionService->sendError($fd, 'Server error');
         }
     }
 
@@ -69,151 +84,78 @@ class WebsocketController
     {
         echo "Connection closed: fd={$fd}\n";
         
-        // Remove user from presence if authenticated
-        if (isset($this->connections[$fd])) {
-            $userId = $this->connections[$fd];
-            RedisManager::removeUserFromPresence($userId);
-            unset($this->connections[$fd]);
-            
+        $userId = $this->connectionService->removeConnection($fd);
+        
+        if ($userId) {
             // Notify other users
-            $this->broadcastUserLeft($userId);
+            $this->broadcastService->broadcastUserLeft($userId);
         }
     }
     
-    // ========================================
-    //               AUTH HANDLERS
-    // ========================================
+    // ====
+    //    ACTION HANDLERS (Delegating to services)
+    // ====
     private function handleAuth(int $fd, array $data): void
     {
-        $username = $data['username'] ?? '';
-        $avatarUrl = $data['avatar_url'] ?? '';
-        $token = $data['token'] ?? null;
-        
-        if (empty($username)) {
-            $this->sendError($fd, 'Username is required');
-            return;
-        }
-        
-        $userId = null;
-        $userData = null;
-        
-        // Check if user has existing token
-        if ($token) {
-            $userData = RedisManager::getUserByToken($token);
-            if ($userData) {
-                $userId = $userData['id'];
-            }
-        }
-        
-        // Create new user if needed
-        if (!$userId) {
-            $userId = RedisManager::generateUserId();
-            $token = RedisManager::generateToken();
+        try {
+            $username = $data['username'] ?? '';
+            $avatarUrl = $data['avatar_url'] ?? '';
+            $token = $data['token'] ?? null;
             
-            $userData = [
-                'username' => $username,
-                'avatar_url' => $avatarUrl,
-                'token' => $token,
-                'created_at' => time()
-            ];
+            // Authenticate user through service
+            $authResult = $this->authService->authenticate(
+                username: $username, 
+                avatarUrl: $avatarUrl, 
+                token: $token
+            );
             
-            RedisManager::registerUser($userId, $userData);
+            // Register connection
+            $this->connectionService->registerConnection($fd, $authResult['user_id']);
+            
+            // Send auth success response
+            $this->connectionService->sendResponse($fd, [
+                'type' => 'auth_ok',
+                'token' => $authResult['token'],
+                'user_id' => $authResult['user_id'],
+                'chats' => $this->authService->getUserChats($authResult['user_id'])
+            ]);
+            
+            // Send current online users list
+            $onlineUsers = RedisManager::getOnlineUsers();
+            $this->connectionService->sendResponse($fd, [
+                'type' => 'users-list',
+                'users' => $onlineUsers
+            ]);
+            
+            // Broadcast new user joined to others
+            $userData = $authResult['user_data'];
+            $this->broadcastService->broadcastUserJoined(
+                $authResult['user_id'], 
+                $userData['username'], 
+                $userData['avatar_url']
+            );
+            
+        } catch (\Exception $e) {
+            $this->connectionService->sendError($fd, $e->getMessage());
         }
-        
-        // Store connection mapping
-        $this->connections[$fd] = $userId;
-        
-        // Send auth success response
-        $this->server->push($fd, json_encode([
-            'type' => 'auth_ok',
-            'token' => $token,
-            'user_id' => $userId,
-            'chats' => [] // TODO: Load user's chats
-        ]));
-        
-        // Send current online users list
-        $onlineUsers = RedisManager::getOnlineUsers();
-        $this->server->push($fd, json_encode([
-            'type' => 'users-list',
-            'users' => $onlineUsers
-        ]));
-        
-        // Broadcast new user joined to others
-        $this->broadcastUserJoined($userId, $username, $avatarUrl);
     }
     
-    // ========================================
-    //               MESSAGE HANDLERS
-    // ========================================
     private function handleSendMessage(int $fd, array $data): void
     {
         // Check if user is authenticated
-        if (!isset($this->connections[$fd])) {
-            $this->sendError($fd, 'Not authenticated');
+        if (!$this->connectionService->isAuthenticated($fd)) {
+            $this->connectionService->sendError($fd, 'Not authenticated');
             return;
         }
         
-        // TODO: Implement message sending logic
-    }
-    
-    // ========================================
-    //               BROADCAST METHODS
-    // ========================================
-    private function broadcastUserJoined(string $userId, string $username, string $avatarUrl): void
-    {
-        $message = json_encode([
-            'type' => 'user-joined',
-            'user' => [
-                'id' => $userId,
-                'username' => $username,
-                'avatar_url' => $avatarUrl
-            ]
-        ]);
-        
-        // Broadcast to all connected clients except the new user
-        foreach ($this->connections as $fd => $connectedUserId) {
-            if ($connectedUserId !== $userId && $this->server->isEstablished($fd)) {
-                $this->server->push($fd, $message);
-            }
-        }
-    }
-    
-    private function broadcastUserLeft(string $userId): void
-    {
-        $redis = RedisManager::getInstance();
-        $userData = $redis->hGetAll("user:{$userId}");
-        
-        if (!$userData) {
-            return;
-        }
-        
-        $message = json_encode([
-            'type' => 'user-left',
-            'user' => [
-                'id' => $userId,
-                'username' => $userData['username'],
-                'avatar_url' => $userData['avatar_url']
-            ]
-        ]);
-        
-        // Broadcast to all connected clients
-        foreach ($this->connections as $fd => $connectedUserId) {
-            if ($this->server->isEstablished($fd)) {
-                $this->server->push($fd, $message);
-            }
-        }
-    }
-    
-    // ========================================
-    //               UTILITY METHODS
-    // ========================================
-    private function sendError(int $fd, string $message): void
-    {
-        if ($this->server->isEstablished($fd)) {
-            $this->server->push($fd, json_encode([
-                'type' => 'error',
-                'message' => $message
-            ]));
+        try {
+            $userId = $this->connectionService->getUserId($fd);
+            $message = $this->messageService->sendMessage($userId, $data);
+            
+            // TODO: Broadcast message to recipients
+            
+        } catch (\Exception $e) {
+            $this->connectionService->sendError($fd, $e->getMessage());
         }
     }
 }
