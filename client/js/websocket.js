@@ -5,6 +5,7 @@ class WebSocketManager {
         this.connectedUsers = [];
         this.messageHandler = null;
         this.userHandler = null;
+        this.toastHandler = null;
         this.authenticated = false;
         this.userId = null;
         this.userToken = null;
@@ -16,6 +17,10 @@ class WebSocketManager {
 
     setUserHandler(handler) {
         this.userHandler = handler;
+    }
+
+    setToastHandler(handler) {
+        this.toastHandler = handler;
     }
 
     connect() {
@@ -135,6 +140,11 @@ class WebSocketManager {
     handleUserJoined(user) {
         if (!this.connectedUsers.find(u => u.id === user.id)) {
             this.connectedUsers.push(user);
+            this.toastHandler.success(
+                `${user.username} joined the chat`,
+                'User Joined',
+                4000
+            );
             console.log('User joined:', user);
             if (this.userHandler) {
                 this.userHandler.updateChatsFromConnectedUsers(this.connectedUsers);
@@ -144,6 +154,11 @@ class WebSocketManager {
 
     handleUserLeft(user) {
         this.connectedUsers = this.connectedUsers.filter(u => u.id !== user.id);
+        this.toastHandler.info(
+            `${user.username} left the chat`,
+            'User Left',
+            4000
+        );
         console.log('User left:', user);
         if (this.userHandler) {
             this.userHandler.updateChatsFromConnectedUsers(this.connectedUsers);

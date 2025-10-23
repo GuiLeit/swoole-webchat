@@ -158,8 +158,7 @@
     </div>
     
     <script>
-        let currentAvatarId = 1;
-        const maxAvatarId = 70;
+        let currentAvatarId = randAvatar();
         
         const avatarPreview = document.getElementById('avatarPreview');
         const changeAvatarBtn = document.getElementById('changeAvatarBtn');
@@ -169,13 +168,13 @@
         
         // Change avatar on click
         changeAvatarBtn.addEventListener('click', () => {
-            currentAvatarId = currentAvatarId >= maxAvatarId ? 1 : currentAvatarId + 1;
+            currentAvatarId = randAvatar();
             avatarPreview.src = `https://i.pravatar.cc/150?img=${currentAvatarId}`;
         });
         
         // Also change avatar when clicking on the image itself
         avatarPreview.addEventListener('click', () => {
-            currentAvatarId = currentAvatarId >= maxAvatarId ? 1 : currentAvatarId + 1;
+            currentAvatarId = randAvatar();
             avatarPreview.src = `https://i.pravatar.cc/150?img=${currentAvatarId}`;
         });
         
@@ -205,6 +204,15 @@
             window.location.href = '/';
         });
         
+        function randAvatar(min = 1, max = 70) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            currentAvatarId = randAvatar();
+            avatarPreview.src = `https://i.pravatar.cc/150?img=${currentAvatarId}`;
+        });
+
         // Auto-focus username input
         usernameInput.focus();
     </script>
