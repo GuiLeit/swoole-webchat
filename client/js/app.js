@@ -5,6 +5,7 @@ class WhatsAppClone {
         this.chatManager = null;
         this.messageManager = null;
         this.websocketManager = null;
+        this.toastManager = null;
     }
 
     initialize() {
@@ -12,9 +13,11 @@ class WhatsAppClone {
         this.chatManager = new ChatManager(this.uiManager);
         this.websocketManager = new WebSocketManager(this.config);
         this.messageManager = new MessageManager(this.chatManager, this.uiManager, this.websocketManager);
-        
+        this.toastManager = new ToastManager();
+
         this.websocketManager.setMessageHandler(this.messageManager);
         this.websocketManager.setUserHandler(this.chatManager);
+        this.websocketManager.setToastHandler(this.toastManager);
         
         this.messageManager.setupMessageInput();
         this.chatManager.clearChatArea();

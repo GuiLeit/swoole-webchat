@@ -5,6 +5,10 @@ class WebSocketManager {
         this.connectedUsers = [];
         this.messageHandler = null;
         this.userHandler = null;
+        this.toastHandler = null;
+        this.authenticated = false;
+        this.userId = null;
+        this.userToken = null;
     }
 
     setMessageHandler(handler) {
@@ -15,12 +19,22 @@ class WebSocketManager {
         this.userHandler = handler;
     }
 
+    setToastHandler(handler) {
+        this.toastHandler = handler;
+    }
+
     connect() {
         try {
             this.websocket = new WebSocket(this.config.websocketUrl);
 
             this.websocket.onopen = (event) => {
                 console.log('WebSocket connected');
+                // Send authentication immediately after connection
+                if (typeof this.authenticate === 'function') {
+                    this.authenticate();
+                } else {
+                    console.warn('No authenticate() method defined on WebSocketManager');
+                }
             };
 
             this.websocket.onmessage = (event) => {
@@ -34,6 +48,7 @@ class WebSocketManager {
 
             this.websocket.onclose = (event) => {
                 console.log('WebSocket disconnected');
+                this.authenticated = false;
                 setTimeout(() => {
                     this.connect();
                 }, this.config.reconnectInterval);
@@ -48,9 +63,33 @@ class WebSocketManager {
         }
     }
 
+    authenticate() {
+        if (!window.currentUser) {
+            console.error('No user data found for authentication');
+            return;
+        }
+
+        const authData = {
+            action: 'auth',
+            data: {
+                username: window.currentUser.username,
+                avatar_url: window.currentUser.avatarUrl,
+                token: window.userToken || null
+            }
+        };
+
+        this.send(authData);
+    }
+
     handleMessage(data) {
         console.log('WebSocket message received:', data);
         switch (data.type) {
+            case 'auth_ok':
+                this.handleAuthSuccess(data);
+                break;
+            case 'auth_error':
+                this.handleAuthError(data);
+                break;
             case 'welcome':
                 break;
             case 'new-message':
@@ -73,9 +112,39 @@ class WebSocketManager {
         }
     }
 
+    handleAuthSuccess(data) {
+        console.log('Authentication successful:', data);
+        this.authenticated = true;
+        this.userId = data.user_id;
+        this.userToken = data.token;
+
+        // Store token for future connections
+        if (data.token) {
+            localStorage.setItem('userToken', data.token);
+        }
+
+        // Update current user with server-assigned ID
+        if (window.currentUser) {
+            window.currentUser.id = data.user_id;
+        }
+    }
+
+    handleAuthError(data) {
+        console.error('Authentication failed:', data.message);
+        // Clear stored data and redirect to auth page
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userToken');
+        window.location.href = '/auth.html';
+    }
+
     handleUserJoined(user) {
         if (!this.connectedUsers.find(u => u.id === user.id)) {
             this.connectedUsers.push(user);
+            this.toastHandler.success(
+                `${user.username} joined the chat`,
+                'User Joined',
+                4000
+            );
             console.log('User joined:', user);
             if (this.userHandler) {
                 this.userHandler.updateChatsFromConnectedUsers(this.connectedUsers);
@@ -85,6 +154,11 @@ class WebSocketManager {
 
     handleUserLeft(user) {
         this.connectedUsers = this.connectedUsers.filter(u => u.id !== user.id);
+        this.toastHandler.info(
+            `${user.username} left the chat`,
+            'User Left',
+            4000
+        );
         console.log('User left:', user);
         if (this.userHandler) {
             this.userHandler.updateChatsFromConnectedUsers(this.connectedUsers);

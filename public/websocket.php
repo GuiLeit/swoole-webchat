@@ -23,21 +23,21 @@ $server->set([
     'heartbeat_idle_time' => 600,
 ]);
 
-$WebsocketController = new WebsocketController($server);
+$websocketController = new WebsocketController($server);
 
 // ========================================
 //               SERVER EVENTS
 // ========================================
-$server->on('open', function (Server $server, Request $request) use ($WebsocketController) {
-    $WebsocketController->handleOpen($request);
+$server->on('open', function (Server $server, Request $request) use ($websocketController) {
+    $websocketController->handleOpen($request);
 });
 
-$server->on('message', function (Server $server, Frame $frame) use ($WebsocketController) {
-    $WebsocketController->handleMessage($frame);
+$server->on('message', function (Server $server, Frame $frame) use ($websocketController) {
+    $websocketController->handleMessage($frame);
 });
 
-$server->on('close', function (int $fd) use ($WebsocketController) {
-    $WebsocketController->handleClose($fd);
+$server->on('close', function (Server $server, int $fd) use ($websocketController) {
+    $websocketController->handleClose($fd);
 });
 
 $server->on('start', function (Server $server) {

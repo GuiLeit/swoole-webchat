@@ -11,24 +11,32 @@ class ChatManager {
         this.chats = [];
         
         connectedUsers.forEach(user => {
+            // Skip if this is the current user
+            if (window.currentUser && user.id === window.currentUser.id) {
+                return;
+            }
+            
             const existingChat = existingChats.find(chat => chat.userId === user.id);
             
             if (existingChat) {
                 this.chats.push(existingChat);
-            } else {
-                const newChat = {
-                    id: this.nextChatId++,
-                    userId: user.id,
-                    name: user.name,
-                    avatar: user.avatarUrl,
-                    lastMessage: "Online agora",
-                    timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                    unreadCount: 0,
-                    messages: [],
-                    isOnline: true
-                };
-                this.chats.push(newChat);
-            }
+                return;
+            } 
+
+            const newChat = {
+                id: this.nextChatId++,
+                userId: user.id,
+                name: user.username,
+                avatar: user.avatar_url,
+                lastMessage: "Online agora",
+                timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                unreadCount: 0,
+                messages: [],
+                isOnline: true
+            };
+            console.log('New chat created:', newChat);
+            this.chats.push(newChat);
+            
         });
         
         this.uiManager.renderChatList(this.chats);
