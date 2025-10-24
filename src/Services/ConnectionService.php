@@ -62,6 +62,20 @@ class ConnectionService
         return $this->connections[$fd] ?? null;
     }
     
+
+    /**
+     * Send authentication error message to specific connection
+     */
+    public function sendAuthError(int $fd, string $message): void
+    {
+        if ($this->server->isEstablished($fd)) {
+            $this->server->push($fd, json_encode([
+                'type' => 'auth-error',
+                'message' => $message
+            ]));
+        }
+    }
+    
     /**
      * Send error message to specific connection
      */

@@ -117,7 +117,7 @@ class WebsocketController
             
             // Send auth success response
             $this->connectionService->sendResponse($fd, [
-                'type' => 'auth_ok',
+                'type' => 'auth-ok',
                 'token' => $authResult['token'],
                 'user_id' => $authResult['user_id'],
                 'chats' => $this->authService->getUserChats($authResult['user_id'])
@@ -139,7 +139,7 @@ class WebsocketController
             );
             
         } catch (\Exception $e) {
-            $this->connectionService->sendError($fd, $e->getMessage());
+            $this->connectionService->sendAuthError($fd, $e->getMessage());
         }
     }
     
