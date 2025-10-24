@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Services\RedisManager;
+use App\Services\UserService;
+use App\Entities\User;
 
 class AuthService
 {
@@ -14,40 +16,35 @@ class AuthService
         if (empty($username)) {
             throw new \InvalidArgumentException('Username is required');
         }
-        
+
         $userId = null;
-        $userData = null;
-        
+        $user = null;
+        $userService = new UserService();
+
         // Check if user has existing token
         if ($token) {
-            $userData = RedisManager::getUserByToken($token);
-            if ($userData) {
-                $userId = $userData['id'];
+            $user = $userService->getUserByToken($token);
+            if ($user) {
+                $userId = $user->id;
             }
         }
-        
+
         // Create new user if needed
         if (!$userId) {
-            $userId = RedisManager::generateUserId();
-            $token = RedisManager::generateToken();
-            
-            $userData = [
-                'username' => $username,
-                'avatar_url' => $avatarUrl,
-                'token' => $token,
-                'created_at' => time()
-            ];
-            
-            RedisManager::registerUser($userId, $userData);
+            $userId = 'user_' . bin2hex(random_bytes(16));
+            $token = bin2hex(random_bytes(32));
+
+            $user = User::create($userId, $username, $avatarUrl, $token, time());
+            $userService->registerUser($user);
         }
-        
+
         return [
             'user_id' => $userId,
             'token' => $token,
-            'user_data' => $userData
+            'user_data' => $user?->toArray()
         ];
     }
-    
+
     /**
      * Get user's chats (placeholder for future implementation)
      */
