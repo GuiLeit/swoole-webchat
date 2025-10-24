@@ -32,19 +32,19 @@ class MessageManager {
         const activeChat = this.chatManager.getActiveChat();
         if (!activeChat || !messageText.trim()) return;
 
-        const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const currentTime = new Date();
         
         const newMessage = {
             id: Date.now(),
             sender: 'sent',
             text: messageText,
-            timestamp: currentTime,
+            timestamp: currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
             status: 'sending'
         };
 
         activeChat.messages.push(newMessage);
         activeChat.lastMessage = messageText;
-        activeChat.timestamp = currentTime;
+        activeChat.timestamp = currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         activeChat.isNewChat = false;
 
         this.uiManager.renderMessages(activeChat);
@@ -53,9 +53,9 @@ class MessageManager {
         if (activeChat.userId && this.websocketManager.isConnected()) {
             const messageData = {
                 type: 'send-message',
-                recipientId: activeChat.userId,
+                chatId: activeChat.id,
                 message: messageText,
-                timestamp: currentTime
+                timestamp: currentTime.toLocaleString('pt-BR')
             };
 
             if (this.websocketManager.send(messageData)) {
