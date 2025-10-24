@@ -4,6 +4,7 @@ namespace App\Services;
 
 use OpenSwoole\WebSocket\Server;
 use App\Services\RedisManager;
+use App\Services\UserService;
 
 class ConnectionService
 {
@@ -39,7 +40,7 @@ class ConnectionService
         $userId = $this->connections[$fd];
         
         // Remove user from presence
-        RedisManager::removeUserFromPresence($userId);
+        (new UserService())->removeUserFromPresence($userId);
         unset($this->connections[$fd]);
         
         return $userId;

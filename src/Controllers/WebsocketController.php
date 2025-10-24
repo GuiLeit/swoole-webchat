@@ -10,6 +10,7 @@ use App\Services\AuthService;
 use App\Services\MessageService;
 use App\Services\BroadcastService;
 use App\Services\ConnectionService;
+use App\Services\UserService;
 
 class WebsocketController
 {
@@ -20,6 +21,7 @@ class WebsocketController
     private MessageService $messageService;
     private BroadcastService $broadcastService;
     private ConnectionService $connectionService;
+    private UserService $userService;
 
     public function __construct(Server $server)
     {
@@ -30,6 +32,7 @@ class WebsocketController
         $this->messageService = new MessageService();
         $this->broadcastService = new BroadcastService($server, $this->connections);
         $this->connectionService = new ConnectionService($server, $this->connections);
+    $this->userService = new UserService();
     }
 
     // ====
@@ -120,8 +123,8 @@ class WebsocketController
                 'chats' => $this->authService->getUserChats($authResult['user_id'])
             ]);
             
-            // Send current online users list
-            $onlineUsers = RedisManager::getOnlineUsers();
+            // Send current online users list (serialize entities)
+            $onlineUsers = array_map(fn($u) => $u->toArray(), $this->userService->getOnlineUsers());
             $this->connectionService->sendResponse($fd, [
                 'type' => 'users-list',
                 'users' => $onlineUsers

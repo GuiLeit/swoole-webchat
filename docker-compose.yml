@@ -18,6 +18,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./:/app
     ports:
       - "127.0.0.1:9501:9501"  # WebSocket - localhost
     depends_on:
@@ -25,13 +27,16 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - XDEBUG_MODE=coverage,debug
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "127.0.0.1:6379:6379"  # Redis - localhost only
-    volumes:
-      - redis_data:/data
+    # ports:
+    #   - "127.0.0.1:6379:6379"  # Redis - localhost only
+    tmpfs:
+      - /data
+    # volumes:
+    #   - redis_data:/data
     command: redis-server --appendonly yes
 
 volumes:
