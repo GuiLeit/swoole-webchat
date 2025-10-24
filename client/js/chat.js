@@ -23,7 +23,7 @@ class ChatManager {
             } 
 
             const newChat = {
-                id: ChatUtils.generateChatId(window.currentUser.id, user.id),
+                id: ChatUtils.generateDmChatId(window.currentUser.id, user.id),
                 userId: user.id,
                 name: user.username,
                 avatar: user.avatar_url,
@@ -107,45 +107,9 @@ class ChatUtils {
      * @param {string} userId2 - Second user ID
      * @returns {string} - Unique chat ID
      */
-    static generateChatId(userId1, userId2) {
+    static generateDmChatId(userId1, userId2) {
         // Sort user IDs to ensure consistency
         const sortedIds = [userId1, userId2].sort();
-        const combined = `${sortedIds[0]}_${sortedIds[1]}`;
-        
-        // Generate hash for obfuscation (optional but recommended)
-        return this.simpleHash(combined);
-    }
-
-    /**
-     * Simple hash function for generating chat IDs
-     * @param {string} str - String to hash
-     * @returns {string} - Hashed string
-     */
-    static simpleHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-        return 'chat_' + Math.abs(hash).toString(36);
-    }
-
-    /**
-     * Alternative: More secure hash using Web Crypto API (async)
-     * Use this if you want better security
-     */
-    static async generateSecureChatId(userId1, userId2) {
-        const sortedIds = [userId1, userId2].sort();
-        const combined = `${sortedIds[0]}_${sortedIds[1]}`;
-        
-        const encoder = new TextEncoder();
-        const data = encoder.encode(combined);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        
-        // Return first 16 characters for shorter ID
-        return 'chat_' + hashHex.substring(0, 16);
+        return `chat-${sortedIds[0]}-dm-${sortedIds[1]}`;
     }
 }

@@ -84,10 +84,10 @@ class WebSocketManager {
     handleMessage(data) {
         console.log('WebSocket message received:', data);
         switch (data.type) {
-            case 'auth_ok':
+            case 'auth-ok':
                 this.handleAuthSuccess(data);
                 break;
-            case 'auth_error':
+            case 'auth-error':
                 this.handleAuthError(data);
                 break;
             case 'welcome':
@@ -106,6 +106,9 @@ class WebSocketManager {
                 break;
             case 'users-list':
                 this.handleUsersList(data.users);
+                break;
+            case 'error':
+                this.handleError(data.message);
                 break;
             default:
                 console.log('Unknown message type:', data);
@@ -135,6 +138,13 @@ class WebSocketManager {
         localStorage.removeItem('userData');
         localStorage.removeItem('userToken');
         window.location.href = '/auth.html';
+    }
+
+    handleError(message) {
+        console.error('WebSocket error message:', message);
+        if (this.toastHandler) {
+            this.toastHandler.error(message, 'WebSocket Error', 5000);
+        }
     }
 
     handleUserJoined(user) {
