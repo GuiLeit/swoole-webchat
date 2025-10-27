@@ -2,39 +2,64 @@
 
 namespace App\Services;
 
+use App\Repositories\ChatRepository;
 use App\Entities\Chat;
 
 class ChatService
 {
+	private ChatRepository $chatRepository;
+
+	public function __construct()
+	{
+		$this->chatRepository = new ChatRepository();
+	}
+
 	/**
 	 * Ensure a DM chat exists between two users, linking it to both users.
 	 * Returns chat ID.
 	 */
 	public function ensureDmChat(string $chatId): Chat
 	{
-		$redis = RedisManager::getInstance();
         $users = Chat::getUsersByDmChatId($chatId);
         if(empty($users)) {
             throw new \InvalidArgumentException('User does not belong to the specified chat');
         }
 
-		$metaKey = "chat:{$chatId}:meta";
-        if ($redis->exists($metaKey)) {
-            $meta = $redis->hGetAll($metaKey);
-            $chat = Chat::fromRedisHash($chatId, $meta);
-            if (!$chat) {
-                throw new \RuntimeException('Failed to load chat metadata');
-            }
-            return $chat;
-        }
+		// Check if chat already exists
+		$chat = $this->chatRepository->getChatById($chatId);
+		if ($chat) {
+			return $chat;
+		}
         
+		// Create new chat
         $chat = Chat::createDmChat($chatId, $users[0], $users[1]);
 
-        $redis->hMSet($metaKey, $chat->toRedisHash());
+		// Store chat metadata
+        $this->chatRepository->storeChat($chat);
 
-        $redis->sAdd("user:{$users[0]}:chats", $chatId);
-        $redis->sAdd("user:{$users[1]}:chats", $chatId);
+		// Link chat to both users
+        $this->chatRepository->addChatToUser($users[0], $chatId);
+        $this->chatRepository->addChatToUser($users[1], $chatId);
 
 		return $chat;
+	}
+
+	/**
+	 * Get all chats for a user
+	 */
+	public function getUserChats(string $userId): array
+	{
+		return $this->chatRepository->getUserChats($userId);
+	}
+
+	/**
+	 * Update chat metadata (last message, timestamp)
+	 */
+	public function updateChatMeta(string $chatId, string $lastMessage, int $timestamp): void
+	{
+		$this->chatRepository->updateChatMeta($chatId, [
+			'last_message' => $lastMessage,
+			'last_timestamp' => $timestamp,
+		]);
 	}
 }

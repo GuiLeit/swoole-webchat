@@ -2,11 +2,21 @@
 
 namespace App\Services;
 
+use App\Repositories\MessageRepository;
 use App\Entities\Chat;
 use App\Entities\Message;
 
 class MessageService
 {
+    private MessageRepository $messageRepository;
+    private ChatService $chatService;
+
+    public function __construct()
+    {
+        $this->messageRepository = new MessageRepository();
+        $this->chatService = new ChatService();
+    }
+
     /**
      * Send a message from one user to another or to a group
      * Returns: [ 'chat_id' => string, 'message' => Message, 'recipients' => string[] ]
@@ -24,14 +34,11 @@ class MessageService
             throw new \InvalidArgumentException("Field 'chatId' is required for direct messages");
         }
 
-        $chatService = new ChatService();
-        $redis = RedisManager::getInstance();
-
-        // Ensure chat exists and get chat id
+        // Ensure chat exists and user belongs to it
         if (!Chat::ensureUserBelongsToChat($chatId, $fromUserId)) { 
             throw new \InvalidArgumentException('User does not belong to the specified chat');
         }
-        $chatService->ensureDmChat($chatId);
+        $this->chatService->ensureDmChat($chatId);
 
         // Create message
         $message = Message::create(
@@ -44,13 +51,12 @@ class MessageService
             throw new \InvalidArgumentException('Invalid message data');
         }
 
-        // Persist message and index in chat
-        $redis->hMSet("message:{$message->id}", $message->toRedisHash());
-        $redis->rPush("chat:{$chatId}:messages", $message->id);
-        $redis->hMSet("chat:{$chatId}:meta", [
-            'last_message' => $message->content,
-            'last_timestamp' => $message->timestamp,
-        ]);
+        // Persist message using repository (automatically limits to 100 messages)
+        $this->messageRepository->storeMessage($message);
+        $this->messageRepository->addMessageToChat($chatId, $message->id);
+        
+        // Update chat metadata
+        $this->chatService->updateChatMeta($chatId, $message->content, $message->timestamp);
 
         $recipientId = Chat::getOtherUserInDm($chatId, $fromUserId);
 
@@ -59,5 +65,21 @@ class MessageService
             'message' => $message,
             'recipients' => [$recipientId],
         ];
+    }
+
+    /**
+     * Get chat messages
+     */
+    public function getChatMessages(string $chatId, int $limit = null): array
+    {
+        return $this->messageRepository->getChatMessages($chatId, $limit);
+    }
+
+    /**
+     * Get message count for a chat
+     */
+    public function getChatMessageCount(string $chatId): int
+    {
+        return $this->messageRepository->getChatMessageCount($chatId);
     }
 }
