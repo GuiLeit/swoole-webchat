@@ -1,6 +1,9 @@
 class Config {
     constructor() {
-        this.websocketUrl = 'ws://localhost:9501';
+        const isSecure = window.location.protocol === 'https:';
+        const wsProto = isSecure ? 'wss' : 'ws';
+
+        this.websocketUrl = `${wsProto}://${window.location.host}/ws`;
         this.reconnectInterval = 5000;
         this.maxReconnectAttempts = 5;
     }
