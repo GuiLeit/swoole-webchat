@@ -15,6 +15,14 @@ class UserService
     }
 
     /**
+     * Get user by ID
+     */
+    public function getUserById(string $userId): ?User
+    {
+        return $this->userRepository->getUserById($userId);
+    }
+
+    /**
      * Register a new user
      */
     public function registerUser(User $user): void
