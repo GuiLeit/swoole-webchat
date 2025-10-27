@@ -11,6 +11,7 @@ services:
       - "8080:80"
     environment:
       - NGINX_HOST=localhost
+      - TZ=America/Sao_Paulo
     depends_on:
       - app
 
@@ -31,8 +32,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    # ports:
-    #   - "127.0.0.1:6379:6379"  # Redis - localhost only
     tmpfs:
       - /data
     # volumes:

@@ -29,6 +29,12 @@ RUN apk add --no-cache $PHPIZE_DEPS \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug
 
+# Set timezone
+ENV TZ=America/Sao_Paulo
+RUN apk add --no-cache tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone
+
 # Generate self-signed certificate
 RUN mkdir -p /etc/ssl/certs /etc/ssl/private && \
     openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/key.pem \

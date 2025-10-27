@@ -12,6 +12,7 @@ use OpenSwoole\WebSocket\Frame;
 use OpenSwoole\Http\Request;
 
 require __DIR__ . '/../vendor/autoload.php';
+date_default_timezone_set(getenv('TZ') ?: 'America/Sao_Paulo');
 
 // ========================================
 //               INITIALIZE SERVER
