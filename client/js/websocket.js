@@ -72,6 +72,7 @@ class WebSocketManager {
         const authData = {
             action: 'auth',
             data: {
+                user_id: window.currentUser.id,
                 username: window.currentUser.username,
                 avatar_url: window.currentUser.avatarUrl,
                 token: window.userToken || null
@@ -123,7 +124,7 @@ class WebSocketManager {
 
         // Store token for future connections
         if (data.token) {
-            localStorage.setItem('userToken', data.token);
+            window.userToken = data.token;
         }
 
         // Update current user with server-assigned ID

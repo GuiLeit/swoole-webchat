@@ -69,7 +69,7 @@ class WebsocketController
                     $this->handleAuth($fd, $message['data'] ?? []);
                     break;
                 
-                case 'send_message':
+                case 'send-message':
                     $this->handleSendMessage($fd, $message['data'] ?? []);
                     break;
                 
@@ -153,9 +153,19 @@ class WebsocketController
         
         try {
             $userId = $this->connectionService->getUserId($fd);
-            $message = $this->messageService->sendMessage($userId, $data);
-            
-            // TODO: Broadcast message to recipients
+            $result = $this->messageService->sendMessage($userId, $data);
+
+            // Notify recipient about the new message
+            $msg = $result['message'];
+            $recipients = $result['recipients'] ?? [];
+            if (!empty($recipients)) {
+                $this->broadcastService->sendToUsers($recipients, [
+                    'type' => 'receive-message',
+                    'senderId' => $userId,
+                    'message' => $msg->content,
+                    'timestamp' => date('H:i'),
+                ]);
+            }
             
         } catch (\Exception $e) {
             $this->connectionService->sendError($fd, $e->getMessage());

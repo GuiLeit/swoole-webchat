@@ -91,7 +91,7 @@ class UserService
         $userData = $redis->hGetAll("user:{$userId}");
         if ($userData) {
             $redis->publish('user_events', json_encode([
-                'type' => 'user_left',
+                'type' => 'user-left',
                 'user' => [
                     'id' => $userId,
                     'username' => $userData['username'] ?? null,
