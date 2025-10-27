@@ -4,6 +4,22 @@ class ChatManager {
         this.activeChat = null;
         this.uiManager = uiManager;
         this.websocketManager = websocketManager;
+
+        // Close active chat on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // If emoji dropdown is open, let its handler close it first
+                const dropdown = document.getElementById('emojiDropdown');
+                if (dropdown && dropdown.classList.contains('active')) return;
+
+                if (this.activeChat) {
+                    this.activeChat = null;
+                    // Remove active highlight from chat list items
+                    document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+                    this.clearChatArea();
+                }
+            }
+        });
     }
 
     getChatById(chatId) {
@@ -66,6 +82,12 @@ class ChatManager {
         document.getElementById('headerProfilePic').src = 'https://i.pravatar.cc/150?img=1';
         document.getElementById('headerContactName').textContent = 'Select a user';
         document.getElementById('headerContactStatus').textContent = 'Click on a user to start chatting';
+
+        // Hide header and message input when no active chat
+        const chatHeader = document.getElementById('chatHeader');
+        const messageInputContainer = document.getElementById('messageInputContainer');
+        if (chatHeader) chatHeader.classList.add('hidden');
+        if (messageInputContainer) messageInputContainer.classList.add('hidden');
     }
 
     selectChat(chatId) {
@@ -97,6 +119,12 @@ class ChatManager {
         this.uiManager.updateChatHeader(this.activeChat);
         this.uiManager.renderMessages(this.activeChat);
         this.uiManager.renderChatList(this.chats);
+
+        // Show header and message input when a chat is active
+        const chatHeader = document.getElementById('chatHeader');
+        const messageInputContainer = document.getElementById('messageInputContainer');
+        if (chatHeader) chatHeader.classList.remove('hidden');
+        if (messageInputContainer) messageInputContainer.classList.remove('hidden');
     }
 
     handleUserLeft(user) {

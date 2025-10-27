@@ -3,12 +3,35 @@ class MessageManager {
         this.chatManager = chatManager;
         this.uiManager = uiManager;
         this.websocketManager = websocketManager;
+        this.emojis = [
+            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂',
+            '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩',
+            '😘', '😗', '😚', '😙', '😋', '😛', '😜', '🤪',
+            '😝', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐',
+            '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌',
+            '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢',
+            '🤮', '🤧', '🥵', '🥶', '😶‍🌫️', '😵', '🤯', '🤠',
+            '🥳', '😎', '🤓', '🧐', '😕', '😟', '🙁', '😮',
+            '😯', '😲', '😳', '🥺', '😦', '😧', '😨', '😰',
+            '😥', '😢', '😭', '😱', '😖', '😣', '😞', '😓',
+            '😩', '😫', '🥱', '😤', '😡', '😠', '🤬', '👍',
+            '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👏',
+            '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '❤️',
+            '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎',
+            '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘',
+            '💝', '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️',
+            '🔯', '🕎', '☯️', '☦️', '🛐', '⛎', '♈', '♉'
+        ];
     }
 
     setupMessageInput() {
-        const messageInput = document.querySelector('.message-input');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const emojiBtn = document.getElementById('emojiBtn');
+
         if (!messageInput) return;
 
+        // Enter key to send
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.target.value.trim() && this.chatManager.getActiveChat()) {
                 this.sendMessage(e.target.value.trim());
@@ -16,9 +39,9 @@ class MessageManager {
             }
         });
 
-        const sendButton = document.querySelector('.message-input-container .icon-btn:last-child');
-        if (sendButton) {
-            sendButton.addEventListener('click', () => {
+        // Send button click
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => {
                 const message = messageInput.value.trim();
                 if (message && this.chatManager.getActiveChat()) {
                     this.sendMessage(message);
@@ -26,6 +49,83 @@ class MessageManager {
                 }
             });
         }
+
+        // Emoji button click => toggle dropdown
+        if (emojiBtn) {
+            emojiBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleEmojiDropdown(emojiBtn);
+            });
+        }
+
+        // Setup emoji dropdown
+        this.setupEmojiDropdown();
+    }
+
+    setupEmojiDropdown() {
+        const dropdown = document.getElementById('emojiDropdown');
+        const grid = document.getElementById('emojiDropdownGrid');
+        const messageInput = document.getElementById('messageInput');
+
+        if (!dropdown || !grid) return;
+
+        // Populate once
+        if (!grid.dataset.populated) {
+            this.emojis.forEach(emoji => {
+                const item = document.createElement('div');
+                item.className = 'emoji-item';
+                item.textContent = emoji;
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    messageInput.value += emoji;
+                    messageInput.focus();
+                    this.closeEmojiDropdown();
+                });
+                grid.appendChild(item);
+            });
+            grid.dataset.populated = 'true';
+        }
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            const btn = document.getElementById('emojiBtn');
+            if (!dropdown.classList.contains('active')) return;
+            if (dropdown.contains(e.target) || (btn && btn.contains(e.target))) return;
+            this.closeEmojiDropdown();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && dropdown.classList.contains('active')) {
+                this.closeEmojiDropdown();
+            }
+        });
+    }
+
+    toggleEmojiDropdown(anchorBtn) {
+        const dropdown = document.getElementById('emojiDropdown');
+        if (!dropdown) return;
+
+        if (dropdown.classList.contains('active')) {
+            this.closeEmojiDropdown();
+            return;
+        }
+
+        // Position near the button
+        const container = document.getElementById('messageInputContainer');
+        if (container && anchorBtn) {
+            const btnRect = anchorBtn.getBoundingClientRect();
+            const contRect = container.getBoundingClientRect();
+            const left = Math.max(8, btnRect.left - contRect.left);
+            dropdown.style.left = `${left}px`;
+        }
+
+        dropdown.classList.add('active');
+    }
+
+    closeEmojiDropdown() {
+        const dropdown = document.getElementById('emojiDropdown');
+        if (dropdown) dropdown.classList.remove('active');
     }
 
     sendMessage(messageText) {
@@ -33,7 +133,7 @@ class MessageManager {
         if (!activeChat || !messageText.trim()) return;
 
         const currentTime = new Date();
-        
+
         const newMessage = {
             id: Date.now(),
             sender: 'sent',
@@ -78,7 +178,7 @@ class MessageManager {
         const timestamp = data.timestamp;
 
         let senderChat = this.chatManager.getChatByUserId(senderId);
-        
+
         if (!senderChat) {
             console.error('No chat found for sender:', senderId);
             return;
