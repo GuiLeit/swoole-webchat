@@ -23,7 +23,7 @@ class UserRepository
         
         // Store token mapping with 1 hour TTL
         if (!empty($user->token)) {
-            $this->redis->setex("token:{$user->token}", 3600, $user->id);
+            $this->redis->set("token:{$user->token}", $user->id);
         }
     }
 
