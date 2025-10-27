@@ -1,15 +1,23 @@
 class ChatManager {
-    constructor(uiManager) {
+    constructor(uiManager, websocketManager) {
         this.chats = [];
         this.activeChat = null;
         this.uiManager = uiManager;
+        this.websocketManager = websocketManager;
+    }
+
+    getChatById(chatId) {
+        return this.chats.find(chat => chat.id === chatId);
     }
 
     updateChatsFromConnectedUsers(connectedUsers) {
         const existingChats = [...this.chats];
         this.chats = [];
         
-        connectedUsers.forEach(user => {
+        connectedUsers.forEach(userData => {
+            // Convert to User entity
+            const user = User.fromServer(userData);
+            
             // Skip if this is the current user
             if (window.currentUser && user.id === window.currentUser.id) {
                 return;
@@ -22,8 +30,11 @@ class ChatManager {
                 return;
             } 
 
+            // Generate chat ID using Chat entity method
+            const chatId = Chat.generateDmChatId(window.currentUser.id, user.id);
+            
             const newChat = {
-                id: ChatUtils.generateDmChatId(window.currentUser.id, user.id),
+                id: chatId,
                 userId: user.id,
                 name: user.username,
                 avatar: user.avatar_url,
@@ -67,6 +78,15 @@ class ChatManager {
 
         this.activeChat.unreadCount = 0;
 
+        if (this.activeChat.userId && this.websocketManager.isConnected()) {
+            this.websocketManager.send({
+                action: 'get-messages',
+                data: {
+                    chatId: this.activeChat.id
+                }
+            });
+        }
+
         document.querySelectorAll('.chat-item').forEach(item => {
             item.classList.remove('active');
             if (parseInt(item.dataset.chatId) === chatId) {
@@ -96,20 +116,5 @@ class ChatManager {
 
     getChatByUserId(userId) {
         return this.chats.find(chat => chat.userId === userId);
-    }
-}
-
-class ChatUtils {
-    /**
-     * Generate a unique chat ID from two user IDs
-     * Always produces the same ID regardless of order
-     * @param {string} userId1 - First user ID
-     * @param {string} userId2 - Second user ID
-     * @returns {string} - Unique chat ID
-     */
-    static generateDmChatId(userId1, userId2) {
-        // Sort user IDs to ensure consistency
-        const sortedIds = [userId1, userId2].sort();
-        return `chat-${sortedIds[0]}-dm-${sortedIds[1]}`;
     }
 }

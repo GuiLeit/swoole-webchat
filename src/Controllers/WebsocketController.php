@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Entities\Chat;
 use OpenSwoole\WebSocket\Server;
 use OpenSwoole\Http\Request;
 use OpenSwoole\WebSocket\Frame;
@@ -73,6 +74,9 @@ class WebsocketController
                     $this->handleSendMessage($fd, $message['data'] ?? []);
                     break;
                 
+                case 'get-messages':
+                    $this->handleGetMessages($fd, $message['data'] ?? []);
+                    break;
                 default:
                     $this->connectionService->sendError($fd, 'Unknown action: ' . $message['action']);
             }
@@ -166,6 +170,42 @@ class WebsocketController
                     'timestamp' => date('H:i'),
                 ]);
             }
+            
+        } catch (\Exception $e) {
+            $this->connectionService->sendError($fd, $e->getMessage());
+        }
+    }
+
+    private function handleGetMessages(int $fd, array $data): void
+    {
+        // Check if user is authenticated
+        if (!$this->connectionService->isAuthenticated($fd)) {
+            $this->connectionService->sendError($fd, 'Not authenticated');
+            return;
+        }
+        
+        try {
+            $userId = $this->connectionService->getUserId($fd);
+            $chatId = $data['chatId'] ?? '';
+            
+            if (empty($chatId)) {
+                $this->connectionService->sendError($fd, 'chatId is required');
+                return;
+            }
+            
+            if(!Chat::ensureUserBelongsToChat($chatId, $userId)) {
+                $this->connectionService->sendError($fd, 'Access denied to this chat');
+                return;
+            }
+            
+            $messages = $this->messageService->getChatMessages($chatId);
+            
+            // Send messages back to requester
+            $this->connectionService->sendResponse($fd, [
+                'type' => 'chat-messages',
+                'chatId' => $chatId,
+                'messages' => array_map(fn($m) => $m->toArray(), $messages)
+            ]);
             
         } catch (\Exception $e) {
             $this->connectionService->sendError($fd, $e->getMessage());

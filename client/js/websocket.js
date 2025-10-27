@@ -99,6 +99,11 @@ class WebSocketManager {
                     this.messageHandler.handleIncomingMessage(data);
                 }
                 break;
+            case 'chat-messages':
+                if (this.messageHandler) {
+                    this.messageHandler.handleChatMessages(data);
+                }
+                break;
             case 'user-joined':
                 this.handleUserJoined(data.user);
                 break;

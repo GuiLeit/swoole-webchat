@@ -10,8 +10,8 @@ class WhatsAppClone {
 
     initialize() {
         this.uiManager = new UIManager(() => this.chatManager);
-        this.chatManager = new ChatManager(this.uiManager);
         this.websocketManager = new WebSocketManager(this.config);
+        this.chatManager = new ChatManager(this.uiManager, this.websocketManager);
         this.messageManager = new MessageManager(this.chatManager, this.uiManager, this.websocketManager);
         this.toastManager = new ToastManager();
 

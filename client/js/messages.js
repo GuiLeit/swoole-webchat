@@ -84,15 +84,21 @@ class MessageManager {
             return;
         }
 
-        const incomingMessage = {
-            id: Date.now(),
-            sender: 'received',
-            text: messageText,
-            timestamp: timestamp,
-            status: 'received'
-        };
+        // Create Message entity from incoming data
+        const message = new Message({
+            id: Date.now().toString(),
+            sender_id: senderId,
+            chat_id: senderChat.id,
+            content: messageText,
+            type: 'text',
+            timestamp: Math.floor(Date.now() / 1000)
+        });
 
-        senderChat.messages.push(incomingMessage);
+        // Convert to UI format
+        const uiMessage = message.toUIFormat(window.currentUser.id);
+        uiMessage.timestamp = timestamp; // Use server timestamp for display
+
+        senderChat.messages.push(uiMessage);
         senderChat.lastMessage = messageText;
         senderChat.timestamp = timestamp;
 
@@ -107,5 +113,29 @@ class MessageManager {
         }
 
         console.log('Received message from:', senderChat.name, messageText);
+    }
+
+    handleChatMessages(data) {
+        const chatId = data.chatId;
+        const messages = data.messages;
+
+        const chat = this.chatManager.getChatById(chatId);
+        if (!chat) {
+            console.error('No chat found for chatId:', chatId);
+            return;
+        }
+
+        // Convert server messages to Message entities, then to UI format
+        chat.messages = messages.map(msgData => {
+            const msg = Message.fromServer(msgData);
+            return msg.toUIFormat(window.currentUser.id);
+        });
+
+        const activeChat = this.chatManager.getActiveChat();
+        if (activeChat && activeChat.id === chat.id) {
+            this.uiManager.renderMessages(activeChat);
+        }
+
+        console.log('Loaded messages for chat:', chat.name, messages);
     }
 }
