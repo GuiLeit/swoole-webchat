@@ -18,9 +18,27 @@ class User
         }
     }
 
-    public static function create(string $id, string $username, string $avatarUrl = '', string $token = '', ?int $createdAt = null): self
-    {
+    public static function create(
+        string $username,
+        string $avatarUrl = '',
+        ?string $id = null,
+        ?string $token = '',
+        ?int $createdAt = null
+    ): self {
+        if (!$id) $id = self::generateId();
+        if (!$token) $token = self::generateToken();
+        
         return new self($id, $username, $avatarUrl, $token, $createdAt ?? time());
+    }
+
+    public static function generateId(): string
+    {
+        return 'user_' . bin2hex(random_bytes(16));
+    }
+
+    public static function generateToken(): string
+    {
+        return bin2hex(random_bytes(32));
     }
 
     public static function fromRedisHash(string $id, array $hash): ?self

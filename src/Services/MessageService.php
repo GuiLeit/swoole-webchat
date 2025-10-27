@@ -28,7 +28,7 @@ class MessageService
         $redis = RedisManager::getInstance();
 
         // Ensure chat exists and get chat id
-        if (Chat::ensureUserBelongsToChat($chatId, $fromUserId)) { 
+        if (!Chat::ensureUserBelongsToChat($chatId, $fromUserId)) { 
             throw new \InvalidArgumentException('User does not belong to the specified chat');
         }
         $chatService->ensureDmChat($chatId);

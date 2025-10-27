@@ -52,10 +52,12 @@ class MessageManager {
 
         if (activeChat.userId && this.websocketManager.isConnected()) {
             const messageData = {
-                type: 'send-message',
-                chatId: activeChat.id,
-                message: messageText,
-                timestamp: currentTime.toLocaleString('pt-BR')
+                action: 'send-message',
+                data: {
+                    chatId: activeChat.id,
+                    content: messageText,
+                    timestamp: currentTime.toLocaleString('pt-BR')
+                }
             };
 
             if (this.websocketManager.send(messageData)) {
