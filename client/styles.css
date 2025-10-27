@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -441,12 +440,167 @@ body {
     color: #8696a0;
 }
 
+/* Toast Notification Styles */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 16px 20px;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease-out;
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.hiding {
+    animation: slideOut 0.3s ease-out forwards;
+}
+
+.toast::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+.toast.success::before {
+    background: #25D366;
+}
+
+.toast.error::before {
+    background: #DC3545;
+}
+
+.toast.info::before {
+    background: #128C7E;
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.toast.success .toast-icon {
+    background: #25D366;
+    color: white;
+}
+
+.toast.error .toast-icon {
+    background: #DC3545;
+    color: white;
+}
+
+.toast.info .toast-icon {
+    background: #128C7E;
+    color: white;
+}
+
+.toast-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111b21;
+    margin-bottom: 2px;
+}
+
+.toast-message {
+    font-size: 13px;
+    color: #667781;
+    line-height: 1.4;
+}
+
+.toast-close {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #667781;
+    font-size: 16px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    background: #f0f2f5;
+    color: #111b21;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Responsive toast on mobile */
+@media (max-width: 768px) {
+    .toast-container {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+    }
+
+    .toast {
+        min-width: auto;
+        max-width: 100%;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .sidebar {
         width: 350px;
     }
-    
+
     .messages-area {
         padding: 20px 40px;
     }
@@ -456,16 +610,93 @@ body {
     .sidebar {
         width: 100%;
     }
-    
+
     .main-chat {
         display: none;
     }
-    
+
     .sidebar.chat-open {
         display: none;
     }
-    
+
     .main-chat.chat-open {
         display: flex;
     }
+}
+
+/* Emoji Dropdown Styles */
+.message-input-container {
+    position: relative;
+}
+
+.emoji-dropdown {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    /* above input bar */
+    left: 8px;
+    /* will be adjusted in JS for button offset if needed */
+    z-index: 900;
+}
+
+.emoji-dropdown.active {
+    display: block;
+}
+
+.emoji-dropdown-content {
+    background-color: #202c33;
+    border: 1px solid #2a3942;
+    border-radius: 8px;
+    width: 360px;
+    max-height: 320px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    padding: 12px;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.emoji-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.emoji-grid::-webkit-scrollbar-track {
+    background: #111b21;
+}
+
+.emoji-grid::-webkit-scrollbar-thumb {
+    background: #374248;
+    border-radius: 3px;
+}
+
+.emoji-grid::-webkit-scrollbar-thumb:hover {
+    background: #495f6a;
+}
+
+.emoji-item {
+    font-size: 28px;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    text-align: center;
+    user-select: none;
+}
+
+.emoji-item:hover {
+    background-color: #2a3942;
+}
+
+.emoji-item:active {
+    background-color: #374248;
+}
+
+/* Utility: hidden */
+.hidden {
+    display: none !important;
 }

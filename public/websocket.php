@@ -6,12 +6,13 @@
  * - Provides HTTP API endpoints
  */
 
+use App\Controllers\WebsocketController;
 use OpenSwoole\WebSocket\Server;
 use OpenSwoole\WebSocket\Frame;
 use OpenSwoole\Http\Request;
-use OpenSwoole\Http\Response;
 
 require __DIR__ . '/../vendor/autoload.php';
+date_default_timezone_set(getenv('TZ') ?: 'America/Sao_Paulo');
 
 // ========================================
 //               INITIALIZE SERVER
@@ -23,20 +24,21 @@ $server->set([
     'heartbeat_idle_time' => 600,
 ]);
 
+$websocketController = new WebsocketController($server);
 
 // ========================================
 //               SERVER EVENTS
 // ========================================
-$server->on('open', function (Server $server, Request $request) use ($WebsocketController) {
-    echo "New connection established: {$request->fd}\n";
+$server->on('open', function (Server $server, Request $request) use ($websocketController) {
+    $websocketController->handleOpen($request);
 });
 
-$server->on('message', function (Server $server, Frame $frame) {
-    echo "Received message from {$frame->fd}: {$frame->data}\n";
+$server->on('message', function (Server $server, Frame $frame) use ($websocketController) {
+    $websocketController->handleMessage($frame);
 });
 
-$server->on('close', function (int $fd) use ($WebsocketController) {
-    echo "Connection closed: {$fd}\n";
+$server->on('close', function (Server $server, int $fd) use ($websocketController) {
+    $websocketController->handleClose($fd);
 });
 
 $server->on('start', function (Server $server) {

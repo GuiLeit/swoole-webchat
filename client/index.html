@@ -1,31 +1,32 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhatsApp Web Clone</title>
+    <link rel="icon" href="favicon.png" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+    <div id="toastContainer" class="toast-container"></div>
     <div class="container">
         <!-- Left Sidebar -->
         <aside class="sidebar">
             <!-- Sidebar Header -->
             <header class="sidebar-header">
                 <div class="user-info">
-                    <img src="https://i.pravatar.cc/150?img=12" alt="User" class="profile-pic">
-                    <span class="username">WhatsApp</span>
+                    <img src="https://i.pravatar.cc/150?img=12" alt="User" class="profile-pic" id="userProfilePic">
+                    <span class="username" id="currentUsername">WhatsApp</span>
                 </div>
                 <div class="header-icons">
-                    <button class="icon-btn" title="Nova conversa">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="currentColor" d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821c-.001-1.032-1.032-1.646-2.064-1.646zm-4.989 9.869H7.041V11.1h6.975v1.944zm3-4H7.041V7.1h9.975v1.944z"></path>
-                        </svg>
-                    </button>
-                    <button class="icon-btn" title="Menu">
-                        <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="currentColor" d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"></path>
+                    <button class="icon-btn" id="logoutBtn" title="Logout" aria-label="Logout">
+                        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                            <!-- Door frame -->
+                            <path fill="currentColor" d="M13 3h-7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h7v-2h-7V5h7V3z"></path>
+                            <!-- Arrow pointing out to the right -->
+                            <path fill="currentColor" d="M12 7l5 5-5 5v-3H7v-4h5V7z"></path>
                         </svg>
                     </button>
                 </div>
@@ -35,19 +36,21 @@
             <div class="search-container">
                 <div class="search-wrapper">
                     <svg viewBox="0 0 24 24" width="24" height="24" class="search-icon">
-                        <path fill="currentColor" d="M15.009 13.805h-.636l-.22-.219a5.184 5.184 0 0 0 1.256-3.386 5.207 5.207 0 1 0-5.207 5.208 5.183 5.183 0 0 0 3.385-1.255l.221.22v.635l4.004 3.999 1.194-1.195-3.997-4.007zm-4.808 0a3.605 3.605 0 1 1 0-7.21 3.605 3.605 0 0 1 0 7.21z"></path>
+                        <path fill="currentColor"
+                            d="M15.009 13.805h-.636l-.22-.219a5.184 5.184 0 0 0 1.256-3.386 5.207 5.207 0 1 0-5.207 5.208 5.183 5.183 0 0 0 3.385-1.255l.221.22v.635l4.004 3.999 1.194-1.195-3.997-4.007zm-4.808 0a3.605 3.605 0 1 1 0-7.21 3.605 3.605 0 0 1 0 7.21z">
+                        </path>
                     </svg>
                     <input type="text" placeholder="Pesquisar ou começar uma nova conversa" class="search-input">
                 </div>
             </div>
 
             <!-- Filter Tabs -->
-            <div class="filter-tabs">
+            <!-- <div class="filter-tabs">
                 <button class="filter-tab active">Tudo</button>
                 <button class="filter-tab">Não lidas</button>
                 <button class="filter-tab">Favoritas</button>
                 <button class="filter-tab">Grupos</button>
-            </div>
+            </div> -->
 
             <!-- Chat List -->
             <div class="chat-list" id="chatList">
@@ -58,7 +61,7 @@
         <!-- Main Chat Area -->
         <main class="main-chat">
             <!-- Chat Header -->
-            <header class="chat-header" id="chatHeader">
+            <header class="chat-header hidden" id="chatHeader">
                 <div class="chat-header-info">
                     <img src="https://i.pravatar.cc/150?img=1" alt="Contact" class="profile-pic" id="headerProfilePic">
                     <div class="header-text">
@@ -66,18 +69,22 @@
                         <p class="contact-status" id="headerContactStatus">Click on a conversation to start</p>
                     </div>
                 </div>
-                <div class="header-icons">
+                <!-- <div class="header-icons">
                     <button class="icon-btn">
                         <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="currentColor" d="M15.9 14.3H15l-.3-.3c1-1.1 1.6-2.7 1.6-4.3 0-3.7-3-6.7-6.7-6.7S3 6 3 9.7s3 6.7 6.7 6.7c1.6 0 3.2-.6 4.3-1.6l.3.3v.8l5.1 5.1 1.5-1.5-5-5.2zm-6.2 0c-2.6 0-4.6-2.1-4.6-4.6s2.1-4.6 4.6-4.6 4.6 2.1 4.6 4.6-2 4.6-4.6 4.6z"></path>
+                            <path fill="currentColor"
+                                d="M15.9 14.3H15l-.3-.3c1-1.1 1.6-2.7 1.6-4.3 0-3.7-3-6.7-6.7-6.7S3 6 3 9.7s3 6.7 6.7 6.7c1.6 0 3.2-.6 4.3-1.6l.3.3v.8l5.1 5.1 1.5-1.5-5-5.2zm-6.2 0c-2.6 0-4.6-2.1-4.6-4.6s2.1-4.6 4.6-4.6 4.6 2.1 4.6 4.6-2 4.6-4.6 4.6z">
+                            </path>
                         </svg>
                     </button>
                     <button class="icon-btn">
                         <svg viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="currentColor" d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z"></path>
+                            <path fill="currentColor"
+                                d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z">
+                            </path>
                         </svg>
                     </button>
-                </div>
+                </div> -->
             </header>
 
             <!-- Messages Area -->
@@ -91,29 +98,45 @@
             </div>
 
             <!-- Message Input -->
-            <footer class="message-input-container" id="messageInputContainer">
-                <button class="icon-btn">
+            <footer class="message-input-container hidden" id="messageInputContainer">
+                <button class="icon-btn" id="emojiBtn" title="Emoji">
                     <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M9.153 11.603c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962zm-3.204 1.362c-.026-.307-.131 5.218 6.063 5.551 6.066-.25 6.066-5.551 6.066-5.551-6.078 1.416-12.129 0-12.129 0zm11.363 1.108s-.669 1.959-5.051 1.959c-3.505 0-5.388-1.164-5.607-1.959 0 0 5.912 1.055 10.658 0zM11.804 1.011C5.609 1.011.978 6.033.978 12.228s4.826 10.761 11.021 10.761S23.02 18.423 23.02 12.228c.001-6.195-5.021-11.217-11.216-11.217zM12 21.354c-5.273 0-9.381-3.886-9.381-9.159s3.942-9.548 9.215-9.548 9.548 4.275 9.548 9.548c-.001 5.272-4.109 9.159-9.382 9.159zm3.108-9.751c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962z"></path>
-                    </svg>
-                </button>
-                <button class="icon-btn">
-                    <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M1.816 15.556v.002c0 1.502.584 2.912 1.646 3.972s2.472 1.647 3.974 1.647a5.58 5.58 0 0 0 3.972-1.645l9.547-9.548c.769-.768 1.147-1.767 1.058-2.817-.079-.968-.548-1.927-1.319-2.698-1.594-1.592-4.068-1.711-5.517-.262l-7.916 7.915c-.881.881-.792 2.25.214 3.261.959.958 2.423 1.053 3.263.215l5.511-5.512c.28-.28.267-.722.053-.936l-.244-.244c-.191-.191-.567-.349-.957.04l-5.506 5.506c-.18.18-.635.127-.976-.214-.098-.097-.576-.613-.213-.973l7.915-7.917c.818-.817 2.267-.699 3.23.262.5.501.802 1.1.849 1.685.051.573-.156 1.111-.589 1.543l-9.547 9.549a3.97 3.97 0 0 1-2.829 1.171 3.975 3.975 0 0 1-2.83-1.173 3.973 3.973 0 0 1-1.172-2.828c0-1.071.415-2.076 1.172-2.83l7.209-7.211c.157-.157.264-.579.028-.814L11.5 4.36a.572.572 0 0 0-.834.018l-7.205 7.207a5.577 5.577 0 0 0-1.645 3.971z"></path>
+                        <path fill="currentColor"
+                            d="M9.153 11.603c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962zm-3.204 1.362c-.026-.307-.131 5.218 6.063 5.551 6.066-.25 6.066-5.551 6.066-5.551-6.078 1.416-12.129 0-12.129 0zm11.363 1.108s-.669 1.959-5.051 1.959c-3.505 0-5.388-1.164-5.607-1.959 0 0 5.912 1.055 10.658 0zM11.804 1.011C5.609 1.011.978 6.033.978 12.228s4.826 10.761 11.021 10.761S23.02 18.423 23.02 12.228c.001-6.195-5.021-11.217-11.216-11.217zM12 21.354c-5.273 0-9.381-3.886-9.381-9.159s3.942-9.548 9.215-9.548 9.548 4.275 9.548 9.548c-.001 5.272-4.109 9.159-9.382 9.159zm3.108-9.751c.795 0 1.439-.879 1.439-1.962s-.644-1.962-1.439-1.962-1.439.879-1.439 1.962.644 1.962 1.439 1.962z">
+                        </path>
                     </svg>
                 </button>
                 <div class="message-input-wrapper">
-                    <input type="text" placeholder="Digite uma mensagem" class="message-input">
+                    <input type="text" placeholder="Digite uma mensagem" class="message-input" id="messageInput">
                 </div>
-                <button class="icon-btn">
+                <button class="icon-btn" id="sendBtn" title="Send">
                     <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M11.999 14.942c2.001 0 3.531-1.53 3.531-3.531V4.35c0-2.001-1.53-3.531-3.531-3.531S8.469 2.35 8.469 4.35v7.061c0 2.001 1.53 3.531 3.53 3.531zm6.238-3.53c0 3.531-2.942 6.002-6.237 6.002s-6.237-2.471-6.237-6.002H3.761c0 4.001 3.178 7.297 7.061 7.885v3.884h2.354v-3.884c3.884-.588 7.061-3.884 7.061-7.885h-2z"></path>
+                        <path fill="currentColor"
+                            d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z">
+                        </path>
                     </svg>
                 </button>
+
+                <!-- Emoji Dropdown (anchored) -->
+                <div id="emojiDropdown" class="emoji-dropdown">
+                    <div class="emoji-dropdown-content">
+                        <div class="emoji-grid" id="emojiDropdownGrid"></div>
+                    </div>
+                </div>
             </footer>
         </main>
     </div>
 
-    <script src="script.js"></script>
+
+    <script src="js/entities.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/messages.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/app.js"></script>
 </body>
+
 </html>
