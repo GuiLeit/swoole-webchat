@@ -700,3 +700,63 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* Floating Action Buttons */
+.floating-buttons {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+}
+
+.floating-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #00a884;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.floating-btn:hover {
+    background-color: #06cf9c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.floating-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.floating-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Responsive adjustments for floating buttons */
+@media (max-width: 768px) {
+    .floating-buttons {
+        bottom: 16px;
+        left: 16px;
+    }
+    
+    .floating-btn {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .floating-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+}
