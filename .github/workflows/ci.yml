@@ -57,7 +57,14 @@ jobs:
       env:
         REDIS_HOST: 127.0.0.1
         REDIS_PORT: 6379
-      run: vendor/bin/phpunit
+      run: |
+        vendor/bin/phpunit || exit 1  # Explicitly exit with error code
+
+    - name: Check test results
+      if: failure()
+      run: |
+        echo "❌ Tests failed! This PR cannot be merged."
+        exit 1
 
     - name: Upload coverage reports to Codecov
       if: success()
