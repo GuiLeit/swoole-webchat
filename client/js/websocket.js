@@ -9,6 +9,13 @@ class WebSocketManager {
         this.authenticated = false;
         this.userId = null;
         this.userToken = null;
+        
+        // Ping-pong mechanism
+        this.pingInterval = null;
+        this.pongTimeout = null;
+        this.pingIntervalMs = 30000; // Send ping every 30 seconds
+        this.pongTimeoutMs = 10000;  // Wait 10 seconds for pong response
+        this.isAwaitingPong = false;
     }
 
     setMessageHandler(handler) {
@@ -29,6 +36,7 @@ class WebSocketManager {
 
             this.websocket.onopen = (event) => {
                 console.log('WebSocket connected');
+                this.startPingPong();
                 // Send authentication immediately after connection
                 if (typeof this.authenticate === 'function') {
                     this.authenticate();
@@ -48,14 +56,14 @@ class WebSocketManager {
 
             this.websocket.onclose = (event) => {
                 console.log('WebSocket disconnected');
+                this.stopPingPong();
                 this.authenticated = false;
-                setTimeout(() => {
-                    this.connect();
-                }, this.config.reconnectInterval);
+                this.handleConnectionLoss();
             };
 
             this.websocket.onerror = (error) => {
                 console.error('WebSocket error:', error);
+                this.stopPingPong();
             };
 
         } catch (error) {
@@ -85,6 +93,9 @@ class WebSocketManager {
     handleMessage(data) {
         console.log('WebSocket message received:', data);
         switch (data.type) {
+            case 'pong':
+                this.handlePong();
+                break;
             case 'auth-ok':
                 this.handleAuthSuccess(data);
                 break;
@@ -200,5 +211,99 @@ class WebSocketManager {
 
     isConnected() {
         return this.websocket && this.websocket.readyState === WebSocket.OPEN;
+    }
+
+    // Ping-pong mechanism methods
+    startPingPong() {
+        this.stopPingPong(); // Clear any existing intervals
+        
+        this.pingInterval = setInterval(() => {
+            this.sendPing();
+        }, this.pingIntervalMs);
+        
+        console.log('Ping-pong mechanism started');
+    }
+
+    stopPingPong() {
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
+        
+        if (this.pongTimeout) {
+            clearTimeout(this.pongTimeout);
+            this.pongTimeout = null;
+        }
+        
+        this.isAwaitingPong = false;
+        console.log('Ping-pong mechanism stopped');
+    }
+
+    sendPing() {
+        if (!this.isConnected()) {
+            console.warn('Cannot send ping: WebSocket not connected');
+            this.handleConnectionLoss();
+            return;
+        }
+
+        if (this.isAwaitingPong) {
+            console.warn('Previous pong not received, assuming connection lost');
+            this.handleConnectionLoss();
+            return;
+        }
+
+        console.log('Sending ping...');
+        this.isAwaitingPong = true;
+        
+        const pingData = {
+            action: 'ping',
+            timestamp: Date.now()
+        };
+        
+        if (this.send(pingData)) {
+            // Set timeout for pong response
+            this.pongTimeout = setTimeout(() => {
+                console.warn('Pong timeout reached, assuming connection lost');
+                this.handleConnectionLoss();
+            }, this.pongTimeoutMs);
+        } else {
+            console.warn('Failed to send ping');
+            this.handleConnectionLoss();
+        }
+    }
+
+    handlePong() {
+        console.log('Pong received');
+        this.isAwaitingPong = false;
+        
+        if (this.pongTimeout) {
+            clearTimeout(this.pongTimeout);
+            this.pongTimeout = null;
+        }
+    }
+
+    handleConnectionLoss() {
+        console.log('Connection lost detected, attempting reconnection...');
+        this.stopPingPong();
+        this.authenticated = false;
+        
+        if (this.toastHandler) {
+            this.toastHandler.warning(
+                'Connection lost. Reconnecting...',
+                'Connection Issue',
+                3000
+            );
+        }
+        
+        // Close current connection if it exists
+        if (this.websocket) {
+            this.websocket.close();
+        }
+        
+        // Attempt reconnection after a delay
+        setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            this.connect();
+        }, this.config.reconnectInterval || 3000);
     }
 }
