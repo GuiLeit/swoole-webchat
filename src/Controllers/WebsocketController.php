@@ -66,6 +66,10 @@ class WebsocketController
             }
             
             switch ($message['action']) {
+                case 'ping':
+                    $this->handlePing($fd, $message);
+                    break;
+                
                 case 'auth':
                     $this->handleAuth($fd, $message['data'] ?? []);
                     break;
@@ -210,5 +214,17 @@ class WebsocketController
         } catch (\Exception $e) {
             $this->connectionService->sendError($fd, $e->getMessage());
         }
+    }
+    
+    // ====
+    //    PING-PONG HANDLER
+    // ====
+    private function handlePing(int $fd, array $message): void
+    {
+        // Simply respond with pong
+        $this->connectionService->sendResponse($fd, [
+            'type' => 'pong',
+            'timestamp' => $message['timestamp'] ?? time()
+        ]);
     }
 }
